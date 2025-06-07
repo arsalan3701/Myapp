@@ -11,11 +11,9 @@ jobs:
     runs-on: ubuntu-22.04
     
     steps:
-    # Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v4
       
-    # Set up Rust
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
@@ -24,7 +22,6 @@ jobs:
         override: true
         components: rust-src, rustfmt, clippy
         
-    # Install Linux dependencies
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -36,36 +33,24 @@ jobs:
           patchelf \
           desktop-file-utils
         
-    # Set up Node.js (without pnpm setup)
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         
-    # Proper pnpm installation
     - name: Install pnpm
-      run: |
-        npm install -g pnpm
-        echo "Adding pnpm to PATH"
-        echo "$(npm prefix -g)/bin" >> $GITHUB_PATH
+      run: npm install -g pnpm
         
-    # Verify installation
-    - name: Check pnpm version
-      run: pnpm --version
-      
-    # Install project dependencies
     - name: Install project dependencies
       run: pnpm install
       
-    # Build the frontend
-    - name: Build frontend
-      run: pnpm run build
+    # Skip the build step if not needed
+    # - name: Build frontend
+    #   run: pnpm run build
       
-    # Build Tauri app
     - name: Build Tauri application
       run: pnpm tauri build
       
-    # Upload artifacts
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
