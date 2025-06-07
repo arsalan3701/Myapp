@@ -36,18 +36,20 @@ jobs:
           patchelf \
           desktop-file-utils
         
-    # Set up Node.js with pnpm
-    - name: Setup Node.js with pnpm
+    # Set up Node.js (without pnpm setup)
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'pnpm'
         
-    # Explicitly install pnpm (new addition)
+    # Proper pnpm installation
     - name: Install pnpm
-      run: corepack enable && corepack prepare pnpm@latest --activate
-      
-    # Verify pnpm installation
+      run: |
+        npm install -g pnpm
+        echo "Adding pnpm to PATH"
+        echo "$(npm prefix -g)/bin" >> $GITHUB_PATH
+        
+    # Verify installation
     - name: Check pnpm version
       run: pnpm --version
       
