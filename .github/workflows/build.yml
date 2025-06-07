@@ -28,10 +28,14 @@ jobs:
         sudo apt-get install -y \
           libgtk-3-dev \
           libwebkit2gtk-4.0-dev \
+          libjavascriptcoregtk-4.0-dev \  # Key fix for the error
           libappindicator3-dev \
           librsvg2-dev \
           patchelf \
-          desktop-file-utils
+          desktop-file-utils \
+          libsoup2.4-dev \
+          libgstreamer1.0-dev \
+          libgstreamer-plugins-base1.0-dev
         
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -44,12 +48,14 @@ jobs:
     - name: Install project dependencies
       run: pnpm install
       
-    # Skip the build step if not needed
+    # Only include if your project has a build script
     # - name: Build frontend
     #   run: pnpm run build
       
     - name: Build Tauri application
-      run: pnpm tauri build
+      run: |
+        export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+        pnpm tauri build
       
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
