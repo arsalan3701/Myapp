@@ -8,8 +8,7 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-22.04  # Using Ubuntu 22.04 for stability (recommended for Tauri)
-    # Alternative: use ubuntu-24.04 with updated packages below
+    runs-on: ubuntu-22.04
     
     steps:
     # Checkout the repository
@@ -25,7 +24,7 @@ jobs:
         override: true
         components: rust-src, rustfmt, clippy
         
-    # Install Linux dependencies needed for Tauri
+    # Install Linux dependencies
     - name: Install system dependencies
       run: |
         sudo apt-get update
@@ -37,16 +36,20 @@ jobs:
           patchelf \
           desktop-file-utils
         
-    # Set up Node.js
-    - name: Setup Node.js
+    # Set up Node.js with pnpm
+    - name: Setup Node.js with pnpm
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'pnpm'
         
-    # Install package manager
+    # Explicitly install pnpm (new addition)
     - name: Install pnpm
-      run: npm install -g pnpm
+      run: corepack enable && corepack prepare pnpm@latest --activate
+      
+    # Verify pnpm installation
+    - name: Check pnpm version
+      run: pnpm --version
       
     # Install project dependencies
     - name: Install project dependencies
