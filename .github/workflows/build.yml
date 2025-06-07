@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Explicitly use Ubuntu 24.04
     
     steps:
     # Checkout the repository
@@ -24,17 +24,18 @@ jobs:
         override: true
         components: rust-src, rustfmt, clippy
         
-    # Install Linux dependencies needed for Tauri
+    # Install Linux dependencies needed for Tauri (updated for Ubuntu 24.04)
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           libgtk-3-dev \
-          libwebkit2gtk-4.0-dev \
+          libwebkit2gtk-4.1-dev \  # Changed from 4.0 to 4.1
           libappindicator3-dev \
           librsvg2-dev \
           patchelf \
-          desktop-file-utils
+          desktop-file-utils \
+          libayatana-appindicator3-dev  # Additional dependency for Ubuntu 24.04
         
     # Set up Node.js
     - name: Setup Node.js
@@ -43,7 +44,7 @@ jobs:
         node-version: '20'
         cache: 'pnpm' # Change to 'npm' or 'yarn' if needed
         
-    # Install package manager (change to npm or yarn if needed)
+    # Install package manager
     - name: Install pnpm
       run: npm install -g pnpm
       
@@ -51,7 +52,7 @@ jobs:
     - name: Install project dependencies
       run: pnpm install
       
-    # Build the frontend (if using a framework like Vue/React/Svelte)
+    # Build the frontend
     - name: Build frontend
       run: pnpm run build
       
@@ -60,7 +61,7 @@ jobs:
       run: |
         pnpm tauri build --target deb
         pnpm tauri build --target appimage
-        pnpm tauri build --target rpm
+        # pnpm tauri build --target rpm  # RPM might need additional setup
         
     # Upload artifacts for all build targets
     - name: Upload artifacts
@@ -70,18 +71,4 @@ jobs:
         path: |
           src-tauri/target/release/bundle/deb/*.deb
           src-tauri/target/release/bundle/appimage/*.AppImage
-          src-tauri/target/release/bundle/rpm/*.rpm
-          
-    # Optional: Create GitHub release (only on main branch pushes)
-    - name: Create Release
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-      uses: softprops/action-gh-release@v1
-      with:
-        name: "v${{ github.run_number }} Linux Build"
-        body: "Automated Linux builds for Tauri app"
-        draft: false
-        prerelease: false
-        files: |
-          src-tauri/target/release/bundle/deb/*.deb
-          src-tauri/target/release/bundle/appimage/*.AppImage
-          src-tauri/target/release/bundle/rpm/*.rpm
+          # src-tauri/target/release/bundle/rpm/*.rpm
