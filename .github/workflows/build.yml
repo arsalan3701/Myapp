@@ -8,7 +8,8 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-24.04  # Explicitly use Ubuntu 24.04
+    runs-on: ubuntu-22.04  # Using Ubuntu 22.04 for stability (recommended for Tauri)
+    # Alternative: use ubuntu-24.04 with updated packages below
     
     steps:
     # Checkout the repository
@@ -24,25 +25,24 @@ jobs:
         override: true
         components: rust-src, rustfmt, clippy
         
-    # Install Linux dependencies needed for Tauri (updated for Ubuntu 24.04)
+    # Install Linux dependencies needed for Tauri
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           libgtk-3-dev \
-          libwebkit2gtk-4.1-dev \  # Changed from 4.0 to 4.1
+          libwebkit2gtk-4.0-dev \
           libappindicator3-dev \
           librsvg2-dev \
           patchelf \
-          desktop-file-utils \
-          libayatana-appindicator3-dev  # Additional dependency for Ubuntu 24.04
+          desktop-file-utils
         
     # Set up Node.js
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'pnpm' # Change to 'npm' or 'yarn' if needed
+        cache: 'pnpm'
         
     # Install package manager
     - name: Install pnpm
@@ -56,19 +56,13 @@ jobs:
     - name: Build frontend
       run: pnpm run build
       
-    # Build Tauri app for multiple Linux targets
+    # Build Tauri app
     - name: Build Tauri application
-      run: |
-        pnpm tauri build --target deb
-        pnpm tauri build --target appimage
-        # pnpm tauri build --target rpm  # RPM might need additional setup
-        
-    # Upload artifacts for all build targets
+      run: pnpm tauri build
+      
+    # Upload artifacts
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: linux-builds
-        path: |
-          src-tauri/target/release/bundle/deb/*.deb
-          src-tauri/target/release/bundle/appimage/*.AppImage
-          # src-tauri/target/release/bundle/rpm/*.rpm
+        path: src-tauri/target/release/bundle
